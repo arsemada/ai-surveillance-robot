@@ -2,555 +2,445 @@
 
 ## 1. Project Overview
 
-The AI-Based Human-in-the-Loop Surveillance Robot is a mobile robotic system designed for surveillance and assisted navigation at Shaggar Institute of Technology (SIT).
+The AI-Based Human-in-the-Loop Surveillance Robot is a software-driven intelligent robotic system designed to monitor and navigate its environment using computer vision, AI-based object detection, path analysis, and remote human control.
 
-The robot uses a camera and computer vision to understand its surrounding environment. It identifies relevant objects and the surface/path in front of it, allowing it to move when the path is considered clear.
+The robot uses a camera to observe its surroundings. The AI system analyzes the camera input to identify relevant objects such as people and vehicles and to assess whether the path ahead is suitable for movement.
 
-When the system detects a situation that requires human attention, such as a person or vehicle in the robot's path, it sends an alert to a remote operator through a web-based dashboard.
+When the environment is clear, the system can allow the robot to continue moving. When a person, vehicle, obstacle, or uncertain situation is detected, the system can stop the robot and request human intervention through a web-based dashboard.
 
-The operator can then issue commands such as:
+The human operator can then issue commands such as LEFT, RIGHT, STOP, or CONTINUE. After a directional command is executed, the system re-checks the environment before allowing the robot to continue.
 
-- LEFT
-- RIGHT
-- STOP
-- CONTINUE
+The project follows a human-in-the-loop approach:
 
-After a directional command, the robot checks its new environment again before continuing. This creates a human-in-the-loop navigation system where the AI assists with perception while the human operator remains responsible for important navigation decisions.
+> AI observes, the system assists, the human decides when intervention is required, and the robot verifies its environment before continuing.
 
 ---
 
 ## 2. Problem Statement
 
-Traditional remotely controlled surveillance robots require an operator to continuously control the robot's movement.
+Traditional surveillance robots can provide mobility and camera-based monitoring, but an autonomous mobile platform must also understand its environment and respond appropriately to people, vehicles, obstacles, and changing paths.
 
-On the other hand, a completely autonomous robot requires reliable environment understanding and navigation, which can be difficult to achieve in real-world environments.
+A fully autonomous approach can be difficult to implement safely and reliably, particularly in environments where unexpected situations may occur.
 
-This project aims to combine the two approaches.
-
-The robot should be able to move through a suitable path without requiring continuous manual commands, while allowing a human operator to intervene when the AI detects a situation that requires a decision.
-
-The system therefore focuses on:
-
-- Automated environmental perception
-- Assisted movement
-- Human intervention when required
-- Remote monitoring
-- Re-evaluation of the environment after operator commands
+This project therefore proposes a human-in-the-loop approach in which AI is responsible for environmental perception and decision support, while a remote human operator can intervene whenever the system detects a situation that requires human judgment.
 
 ---
 
 ## 3. Proposed Solution
 
-The proposed system consists of a mobile robot equipped with a camera and a computing device.
+The proposed system combines:
 
-The camera continuously captures the environment in front of the robot. A computer-vision service processes the camera frames and identifies relevant environmental information.
+- Computer vision
+- AI-based object detection
+- Path and traversability analysis
+- Decision-making logic
+- Human-in-the-loop control
+- Web-based remote monitoring
+- Robot communication and integration
 
-The initial computer-vision targets are:
+The camera provides visual information to the AI service. The AI service detects relevant objects and analyzes the environment.
 
-- Human/person detection
-- Car/vehicle detection
-- Road/asphalt/traversable-surface understanding
+The decision engine then determines whether the robot can continue moving or whether operator intervention is required.
 
-Based on the detected environment, the system determines whether the robot can continue moving or whether operator intervention is required.
-
-When intervention is required, the backend sends an alert to the web dashboard.
-
-The operator can then select an appropriate command.
-
-After executing a directional command, the robot uses its camera and AI system to evaluate the new direction before continuing.
+The operator interacts with the robot through a web dashboard.
 
 ---
 
 ## 4. Project Objectives
 
-### 4.1 Main Objective
+### 4.1 General Objective
 
-To develop a surveillance robot that combines computer vision, automated movement, and human-in-the-loop remote control.
+To develop an AI-assisted surveillance robot software system that can perceive its environment, support navigation decisions, and allow remote human intervention.
 
 ### 4.2 Specific Objectives
 
-1. Capture the robot's surrounding environment using a camera.
-2. Detect people and vehicles using computer vision.
-3. Identify road, asphalt, or other suitable traversable surfaces.
-4. Allow the robot to move when the path is considered clear.
-5. Detect situations that require operator intervention.
-6. Notify a remote operator through a web dashboard.
-7. Allow the operator to issue movement commands remotely.
-8. Re-evaluate the environment after a directional command.
-9. Record important robot events and operator commands.
-10. Provide a foundation for future autonomous navigation improvements.
+- Detect people and vehicles using computer vision.
+- Analyze the area in front of the robot for traversability.
+- Determine whether the robot can continue moving.
+- Detect situations that require human intervention.
+- Provide real-time robot status and detection information.
+- Allow an operator to issue directional and safety commands.
+- Re-check the environment after a directional command.
+- Develop a software interface for communication with a Raspberry Pi-based robot.
+- Test the AI and decision-making system before physical robot integration.
 
 ---
 
 ## 5. Core System Workflow
 
-The basic operating workflow is:
+The main workflow is:
 
 ```text
 Camera
-   |
-   v
-Computer Vision
-   |
-   v
-Environment Understanding
-   |
-   v
-Is the path clear?
-   |
-   +----------------------+
-   |                      |
-  YES                     NO
-   |                      |
-   v                      v
- MOVE               Operator Alert
-                          |
-                          v
-                    Web Dashboard
-                          |
-              +-----------+-----------+
-              |           |           |
-             LEFT       RIGHT       STOP
-              |
-              +-----------+
-                    |
-                    v
-             Robot executes
-               command
-                    |
-                    v
-          Camera checks again
-                    |
-                    v
-          Environment analysis
-                    |
-             +------+------+
-             |             |
-           CLEAR        NOT CLEAR
-             |             |
-             v             v
-            MOVE      Alert operator
+   ↓
+AI Vision Service
+   ↓
+Object Detection
+   ↓
+Path / Traversability Analysis
+   ↓
+Decision Engine
+   ↓
+┌─────────────────────────────┐
+│                             │
+│ Path Clear                  │
+│       ↓                     │
+│     MOVE                    │
+│                             │
+│ Person / Vehicle /          │
+│ Obstacle / Uncertainty      │
+│       ↓                     │
+│     STOP                    │
+│       ↓                     │
+│ OPERATOR REQUIRED           │
+│       ↓                     │
+│ LEFT / RIGHT / STOP /       │
+│ CONTINUE                    │
+│       ↓                     │
+│ Re-check Environment        │
+└─────────────────────────────┘
 
+The system should not rely on a single AI prediction for safe operation. The robot should verify the environment again after an operator command before continuing.
 
-The robot should not assume that a directional command automatically means the new path is safe.
+6. Computer Vision
 
-After changing direction, the environment should be checked again.
+The computer vision subsystem is responsible for understanding the camera input.
 
-## 6. Computer Vision
+6.1 Object Detection
 
-Computer vision is one of the main components of the system.
+The initial object-detection component will use a pretrained YOLO-based model with COCO-trained weights.
 
-The initial system will focus on three categories of environmental understanding.
+The system will initially focus on relevant classes such as:
 
-6.1 Human Detection
+Person
+Car
+Bus
+Truck
+Motorcycle
+Bicycle
 
-The AI should detect people within the camera view.
+The project will not require downloading and training the complete COCO dataset from scratch.
 
-Example:
+Instead, pretrained object-detection weights will be used for the initial prototype.
 
-Person detected
-Confidence: 92%
-Position: Front-left
+6.2 Path and Traversability Analysis
 
-A person detection may trigger an operator alert depending on the robot's current state and location of the detected person.
+Object detection alone is not sufficient for navigation.
 
-6.2 Vehicle Detection
+The system will also analyze the area in front of the robot to determine whether the available path is suitable for movement.
 
-The AI should detect relevant vehicles, particularly cars.
+The project will initially investigate lightweight computer-vision or segmentation approaches for this task.
 
-Example:
+The objective is to determine:
 
-Car detected
-Confidence: 88%
-Position: Front
+Whether a usable path exists.
+Whether the path is blocked.
+Whether a detected object is within the robot's relevant path.
+Whether the system should request human intervention.
 
-Vehicle detection can be used to identify situations where the robot should stop or request operator intervention.
-
-6.3 Road / Asphalt / Traversable Surface
-
-The robot needs to understand whether the area in front of it represents a suitable surface for movement.
-
-This should not necessarily be treated as a simple image classification problem.
-
-The system may use a computer-vision approach such as:
-
-Semantic segmentation
-Traversable-area detection
-Road-surface detection
-Other suitable vision-based navigation methods
-
-The final approach will be selected after evaluating available datasets and models.
+The path-analysis component can be improved or replaced as testing identifies limitations.
 
 7. Human-in-the-Loop Control
 
-The project does not aim to make the robot completely autonomous in the initial version.
+The project does not require the AI to make every navigation decision autonomously.
 
-Instead, the system follows a human-in-the-loop approach.
+Instead, the AI provides environmental information and decision support.
 
-The AI is responsible primarily for:
+When intervention is required, the system notifies the remote operator.
 
-Observing the environment
-Detecting relevant objects
-Understanding the visible path
-Identifying situations that require attention
+The operator can issue commands such as:
 
-The human operator is responsible for:
+LEFT
+RIGHT
+STOP
+CONTINUE
 
-Monitoring alerts
-Selecting a direction when required
-Stopping the robot when necessary
-Allowing the robot to continue
+The robot then executes the appropriate command through its control interface.
 
-The robot then verifies the result of the operator's command using its camera and AI system.
+After a directional command, the camera and AI system analyze the new environment before the robot resumes movement.
 
-This creates the following cycle:
-
-AI observes
-     ↓
-AI detects situation
-     ↓
-Operator is notified
-     ↓
-Operator makes decision
-     ↓
-Robot executes command
-     ↓
-AI observes again
 8. Web Dashboard
 
-The operator will control the robot through a web-based dashboard.
+A web-based dashboard will provide the remote operator with a centralized interface for monitoring and controlling the robot.
 
-The dashboard should provide:
+The dashboard is expected to provide:
 
-Live Monitoring
-Camera feed
+Live camera feed
 Robot status
-Current direction
-Current environment information
-AI Information
+Detected objects
+Detection confidence
+Path status
+Operator alerts
+Directional controls
+STOP control
+CONTINUE control
+Event history
 
 Example:
 
-Surface: ASPHALT
-Path: CLEAR
-
-Detections:
-- Person: 0
-- Car: 0
-
-When an object is detected:
-
-⚠ HUMAN DETECTED
-
-Confidence: 94%
-Position: Front-right
-
-Operator action required
-Robot Controls
-
-The dashboard will provide controls such as:
-
-        [ LEFT ]
-
-[ STOP ]       [ CONTINUE ]
-
-       [ RIGHT ]
-
-The exact interface may change as the system develops.
-
-Event History
-
-The system should record important events such as:
-
-Human detected
-Vehicle detected
-Robot stopped
-Operator selected LEFT
-Operator selected RIGHT
-Operator selected CONTINUE
-Robot resumed movement
+┌──────────────────────────────────────┐
+│          ROBOT SURVEILLANCE          │
+├──────────────────────────────────────┤
+│                                      │
+│             LIVE CAMERA              │
+│                                      │
+├──────────────────────────────────────┤
+│ Status: OPERATOR REQUIRED            │
+│                                      │
+│ Detected: Person                     │
+│ Path: BLOCKED                        │
+│                                      │
+│      [ LEFT ] [ STOP ] [ RIGHT ]    │
+│              [ CONTINUE ]            │
+└──────────────────────────────────────┘
 9. System Architecture
 
-The initial software architecture is:
+The system will be divided into software, AI, and robot components.
 
-                    +----------------------+
-                    |       Camera         |
-                    +----------+-----------+
-                               |
-                               v
-                    +----------------------+
-                    |   AI / CV Service    |
-                    |                      |
-                    | Person Detection     |
-                    | Vehicle Detection   |
-                    | Surface Understanding|
-                    +----------+-----------+
-                               |
-                               v
-                    +----------------------+
-                    |   Decision Engine    |
-                    +----------+-----------+
-                               |
-                               v
-                    +----------------------+
-                    |   Backend API        |
-                    |   Spring Boot        |
-                    +----------+-----------+
-                               |
-                    +----------+-----------+
-                    |                      |
-                    v                      v
-          +----------------+     +----------------+
-          |   PostgreSQL   |     | Web Dashboard  |
-          |    Database    |     |    Next.js     |
-          +----------------+     +----------------+
-                                         |
-                                         v
-                                Remote Operator
+                    CAMERA
+                       │
+                       ↓
+              ┌────────────────┐
+              │   AI SERVICE   │
+              │                │
+              │ YOLO Detection │
+              │ Path Analysis  │
+              └───────┬────────┘
+                      │
+                      ↓
+              ┌────────────────┐
+              │ Decision Engine│
+              └───────┬────────┘
+                      │
+             ┌────────┴────────┐
+             ↓                 ↓
+       Spring Boot         Web Dashboard
+          Backend              │
+             │                 │
+             └────────┬────────┘
+                      │
+                  Robot API
+                      │
+                      ↓
+               Raspberry Pi
+                      │
+          ┌───────────┼───────────┐
+          ↓           ↓           ↓
+       Camera      4 DC Motors  Servo
+10. Software Responsibilities
 
-The robot-side hardware and software will communicate with the backend through an appropriate communication mechanism.
+The project software will primarily be divided into the following components.
 
-Possible communication technologies include:
+AI Service
 
-REST API
-WebSocket
-MQTT
-ROS 2
+Responsible for:
 
-The final communication approach will be selected during implementation based on the requirements of the robot and network environment.
+Camera/image processing
+Object detection
+Path analysis
+AI inference
+Detection results
+Decision Engine
 
-10. Robot States
+Responsible for:
 
-The robot can be represented using a state-based control system.
+Interpreting AI results
+Determining robot state
+Deciding when operator intervention is required
+Generating robot commands
+Backend
+
+Responsible for:
+
+Robot communication
+Command APIs
+Robot state
+AI result communication
+Event management
+Real-time communication
+Frontend
+
+Responsible for:
+
+Remote monitoring
+Live status
+Detection visualization
+Operator alerts
+Robot commands
+Robot Integration
+
+The physical robot will be implemented separately using a Raspberry Pi-based platform.
+
+The planned hardware includes:
+
+Raspberry Pi
+Camera
+4 DC motors
+Servo motor
+
+The software system will communicate with the Raspberry Pi through a defined communication interface.
+
+The exact motor-control implementation will be handled as part of the robot/hardware subsystem.
+
+11. Robot States
+
+The system will use a state-based decision model.
 
 Initial states include:
 
 START
-  |
-  v
+  ↓
 MOVING
-  |
-  +---- Path clear ------> MOVING
-  |
-  +---- Person detected -> OPERATOR_REQUIRED
-  |
-  +---- Vehicle detected -> OPERATOR_REQUIRED
-  |
-  +---- Unsafe condition -> STOPPED
-
-When the operator is required:
-
-OPERATOR_REQUIRED
-       |
-       +---- LEFT ------> CHECK_PATH
-       |
-       +---- RIGHT -----> CHECK_PATH
-       |
-       +---- CONTINUE --> CHECK_PATH
-       |
-       +---- STOP ------> STOPPED
-
-After a directional command:
-
-CHECK_PATH
-    |
-    +---- Clear ------> MOVING
-    |
-    +---- Not clear -> OPERATOR_REQUIRED
-
-This state-machine approach will help keep the robot's behavior predictable and easier to test.
-
-11. Technology Stack
-Artificial Intelligence / Computer Vision
+  ↓
+CHECKING_ENVIRONMENT
+  ↓
+┌───────────────────────┐
+│                       │
+│ CLEAR                 │
+│   ↓                   │
+│ MOVING                │
+│                       │
+│ PERSON / VEHICLE /    │
+│ OBSTACLE / UNCERTAIN  │
+│   ↓                   │
+│ OPERATOR_REQUIRED     │
+│                       │
+└───────────────────────┘
+          ↓
+    LEFT / RIGHT /
+    STOP / CONTINUE
+          ↓
+    CHECKING_ENVIRONMENT
+          ↓
+       MOVING
+12. Technology Stack
+AI / Computer Vision
 Python
 PyTorch
 OpenCV
-YOLO or another suitable object-detection model
-Segmentation or traversable-area model where appropriate
-
-The final models will be selected after dataset and model evaluation.
-
+YOLO-based object detection
+COCO-pretrained model weights
+Segmentation or other path-analysis techniques
 Backend
 Java
 Spring Boot
-Spring Web
+REST API
+WebSocket or another real-time communication mechanism
 PostgreSQL
-WebSocket or another suitable real-time communication mechanism
 Frontend
 Next.js
 React
-TypeScript or JavaScript
-Dashboard UI components
+TypeScript/JavaScript
 Robot
-Raspberry Pi or suitable onboard computer
-Camera
-Motor controller
-Motors
-Wheels
-Battery
-Robot chassis
-
-The physical hardware will be integrated after the software prototype is working on a computer.
-
-12. Development Strategy
-
-Development will begin with a computer-based prototype before connecting the AI system to the physical robot.
-
-Phase 1 — Project Foundation
-Create repository
-Prepare project documentation
-Establish project structure
-Define system architecture
-Phase 2 — Dataset and AI Research
-
-Identify and evaluate suitable public datasets for:
-
-People
-Cars/vehicles
-Road/asphalt/traversable surfaces
-
-Evaluate:
-
-Dataset size
-Image quality
-Labels
-Real-world relevance
-Licensing
-Training/validation/test splits
-
-Select suitable pretrained models or datasets based on the results.
-
-Phase 3 — Computer Vision Prototype
-
-Use a computer webcam to:
-
-Capture frames
-Detect people
-Detect vehicles
-Analyze the road/traversable area
-Display detections
-Produce an initial movement decision
-Phase 4 — Virtual Robot Control
-
-Before connecting physical motors, simulate robot commands.
-
-Example:
-
-AI detects person
-       ↓
-OPERATOR_REQUIRED
-       ↓
-Dashboard
-       ↓
-Operator selects RIGHT
-       ↓
-Virtual robot turns RIGHT
-       ↓
-AI checks new path
-       ↓
-CLEAR
-       ↓
-MOVE
-Phase 5 — Backend
-
-Implement:
-
-Robot status
-Detection events
-Operator commands
-Robot commands
-Event logging
-Real-time communication
-Phase 6 — Web Dashboard
-
-Implement:
-
-Live monitoring
-AI detection information
-Robot status
-Alerts
-Direction controls
-Event history
-Phase 7 — Raspberry Pi Integration
-
-Connect the software prototype to:
-
 Raspberry Pi
 Camera
-Motor controller
-Physical motors
-Phase 8 — Physical Testing
+4 DC motors
+Servo motor
 
-Test the robot in a controlled environment.
+The final communication protocol between the software system and Raspberry Pi will be determined during the integration phase.
 
-Testing will begin with simple situations before gradually introducing more complex scenarios.
+13. Development Strategy
 
-Phase 9 — Evaluation
+The project will be developed incrementally.
 
-Measure:
+Phase 1 — Project Foundation
+Project documentation
+Repository structure
+Development environment
+Phase 2 — AI Vision Prototype
+Set up AI service
+Load pretrained YOLO model
+Test person and vehicle detection
+Test camera input
+Develop initial path-analysis approach
+Phase 3 — Decision Engine
+Define robot states
+Implement movement decisions
+Implement operator intervention logic
+Implement simulated robot commands
+Phase 4 — Backend
+Create Spring Boot backend
+Implement robot command APIs
+Implement robot status APIs
+Connect AI service with backend
+Implement real-time communication
+Phase 5 — Web Dashboard
+Live monitoring
+Detection display
+Robot status
+Operator alerts
+Directional controls
+Phase 6 — Raspberry Pi Integration
+Define communication protocol
+Connect software to Raspberry Pi
+Send movement commands
+Receive robot/camera information
+Test communication reliability
+Phase 7 — Physical Robot Testing
+Integrate with the physical robot
+Test movement commands
+Test camera input
+Test AI detection
+Test operator intervention
+Test path re-checking
+Phase 8 — Evaluation
 
-Detection accuracy
+The final system will be evaluated using measures such as:
+
+Object detection accuracy
 False detections
-Response time
-Operator command latency
-Navigation success
+Path-analysis performance
+Decision response time
+Command latency
+Robot navigation success
 System reliability
-Robot response to detected obstacles
-13. Minimum Viable Product (MVP)
+14. Minimum Viable Product (MVP)
 
-The first working version should focus on a small and achievable set of capabilities.
+The first working version will not require the physical robot.
 
-MVP Requirements
-Laptop webcam provides the camera input.
-AI detects people.
-AI detects cars.
-AI identifies the relevant road/traversable area.
-The system determines whether the current path is clear.
-The system displays the robot state.
-A simulated robot can receive LEFT, RIGHT, STOP, and CONTINUE commands.
-The system re-checks the environment after a directional command.
-Events are displayed in the dashboard.
+The MVP will use a laptop/PC camera to demonstrate:
 
-The Raspberry Pi and physical robot will be integrated after the computer-based MVP works reliably.
+Person detection.
+Vehicle detection.
+Camera-based environment analysis.
+Basic path assessment.
+MOVE decision when the path is clear.
+STOP/OPERATOR REQUIRED decision when intervention is needed.
+Simulated LEFT, RIGHT, STOP, and CONTINUE commands.
+Re-checking the environment after a directional command.
 
-14. Safety Considerations
+After the software MVP is validated, it will be connected to the Raspberry Pi-based robot.
 
-The AI system should not be treated as the only safety mechanism.
+15. Safety Considerations
 
-The physical robot should have a reliable emergency stop or manual override mechanism.
+The AI system is intended to provide perception and decision support.
 
-Important principles include:
+It should not be treated as the only safety mechanism for the physical robot.
 
-The operator must be able to stop the robot.
-The robot should not blindly continue after an uncertain detection.
-The robot should verify the environment after changing direction.
-Physical safety mechanisms should operate independently of the AI where possible.
-Initial physical tests should be performed in a controlled environment.
-15. Future Improvements
+The physical robot should have an independent emergency stop/manual override mechanism.
 
-Future versions may include:
+Testing should initially be performed in controlled environments and at low speed.
 
-Improved autonomous navigation
-Better obstacle avoidance
-Additional object classes
-Night-time detection
-Low-light camera support
-GPS integration
+16. Future Improvements
+
+Possible future improvements include:
+
+Better path segmentation
+SIT-specific dataset collection
+Fine-tuning models using local data
+Additional obstacle classes
+Improved navigation
+GPS/location support
 Mapping
-SLAM
-Automatic patrol routes
-Multiple camera support
-Improved remote monitoring
-Long-term event analytics
-More advanced path planning
-Additional operator controls
+Autonomous route planning
+Night-time detection
+Low-light enhancement
+Improved real-time communication
+Multi-camera support
+Event recording
+Remote access and authentication
+17. Current Project Principle
 
-These features are outside the initial MVP and will only be added after the core system is working.
-
-16. Current Project Principle
-
-The initial development principle is:
+The project follows the principle:
 
 AI observes, the system assists, the human decides when intervention is required, and the robot verifies its environment before continuing.
-
-The project will begin with a computer-based prototype and progressively move toward physical robot integration.
